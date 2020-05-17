@@ -15,11 +15,13 @@ public class GameUser {
     public String username;
     public String password;
     public boolean currentStatus;
+    public boolean Playing;
 
     public GameUser(int idUser, String username) {
         this.idUser = idUser;
         this.username = username;
         this.currentStatus = true;
+        this.currentStatus = false;
     }
     
     @Override

@@ -6,7 +6,6 @@
 package tictactoe;
 
 import java.sql.SQLException;
-import tictactoe.Models.GameUser;
 
 /**
  *
@@ -33,7 +32,7 @@ public class Tictactoe {
             3. If a user wants to LogOut just call this method with false value:
                 //db.updateConnectionUser(username, false)
         */
-       
+        
         
         
     }
