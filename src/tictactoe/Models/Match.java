@@ -7,12 +7,12 @@ package tictactoe.Models;
 
 import java.util.Date;
 
-
 /**
  *
  * @author mauri
  */
 public class Match {
+
     public Date Date;
     public String PlayerX;
     public String PlayerO;
@@ -24,13 +24,12 @@ public class Match {
         this.PlayerO = PlayerO;
         this.Result = Result;
     }
-    
+
     @Override
-    public String toString()
-    {
+    public String toString() {
         return "Date: " + Date + "\n"
-            + "PlayerX: " + PlayerX + "\n"
-            + "PlayerO: " + PlayerO + "\n"
-            + "Result: " + Result;
+                + "PlayerX: " + PlayerX + "\n"
+                + "PlayerO: " + PlayerO + "\n"
+                + "Result: " + Result;
     }
 }
