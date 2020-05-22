@@ -5,13 +5,15 @@
  */
 package Socket;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 import tictactoe.DB;
 import tictactoe.Models.GameUser;
 
@@ -19,12 +21,18 @@ import tictactoe.Models.GameUser;
  *
  * @author chris
  */
-public class ClientHandler implements Runnable {
+public class ClientHandler extends Thread {
 
     private final DataInputStream dis;
     private final DataOutputStream dos;
     private final Socket s;
+    private final Server server;
+    private final Connection con;
     private GameUser gu;
+
+    public GameUser getGu() {
+        return gu;
+    }
 
     /**
      *
@@ -33,11 +41,14 @@ public class ClientHandler implements Runnable {
      * Stream to the Socket communication
      * @param dos the DataOutputStream of the socket, used for posting to the
      * other end of the communication
+     * @param server
      */
-    public ClientHandler(Socket socket, DataInputStream dis, DataOutputStream dos) {
+    public ClientHandler(Socket socket, DataInputStream dis, DataOutputStream dos, Server server) throws SQLException {
         this.s = socket;
         this.dis = dis;
         this.dos = dos;
+        this.server = server;
+        con = DB.getConnection();
     }
 
     /**
@@ -47,7 +58,6 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         String received;
-        String sent;
         Boolean endCommunication = false;
 
         while (!endCommunication) {
@@ -64,15 +74,18 @@ public class ClientHandler implements Runnable {
                     case "logout":
                         logout();
                         break;
+                    case "allGUCon":
+                        allGUCon();
+                        break;
                     case "exit":
                         logout();
                         endCommunication = false;
                         break;
                 }
-
             } catch (IOException ex) {
+                ex.printStackTrace();
             } catch (SQLException ex) {
-                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+                ex.printStackTrace();
             }
         }
         try {
@@ -80,7 +93,7 @@ public class ClientHandler implements Runnable {
             dos.close();
             s.close();
         } catch (IOException ex) {
-            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 
@@ -95,18 +108,24 @@ public class ClientHandler implements Runnable {
             String username = dis.readUTF();
             String password = dis.readUTF();
 
-            gu = DB.getUser(username, password);
+            System.out.println(username);
+            System.out.println(password);
+
+            gu = DB.getUser(username, password, con);
 
             if (gu != null) {
-                DB.updateConnectionUser(gu.idUser, true);
+                DB.updateConnectionUser(gu.idUser, true, con);
                 System.out.println(gu);
+                dos.writeBoolean(true);
+                return;
             }
+            dos.writeBoolean(false);
         }
     }
 
     private void logout() {
         if (gu != null) {
-            DB.updateConnectionUser(gu.idUser, false);
+            DB.updateConnectionUser(gu.idUser, false, con);
         }
     }
 
@@ -120,6 +139,16 @@ public class ClientHandler implements Runnable {
         String username = dis.readUTF();
         String password = dis.readUTF();
 
-        DB.newUser(username, password);
+        DB.newUser(username, password, con);
+    }
+
+    private void allGUCon() throws IOException {
+        ArrayList<GameUser> allGUConnected = DB.getUsersConnected(con);
+
+        dos.write(allGUConnected.size());
+
+        for (GameUser GU : allGUConnected) {
+            dos.writeUTF(GU.toString());
+        }
     }
 }

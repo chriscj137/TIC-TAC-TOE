@@ -20,13 +20,15 @@ import tictactoe.Models.Match;
  */
 public class DB {
 
-    private static final BasicDataSource ds = new BasicDataSource();
+    public static final BasicDataSource ds;
 
     static {
-        ds.setUrl("jdbc:mysql://localhost/tictactoe");
+        ds = new BasicDataSource();
         ds.setDriverClassName("com.mysql.jdbc.Driver");
+        ds.setUrl("jdbc:mysql://localhost/tictactoe");
         ds.setUsername("root");
         ds.setPassword("");
+        ds.setMaxTotal(100);
     }
 
     /**
@@ -63,15 +65,16 @@ public class DB {
      *
      * @param username The username input by the player.
      * @param password The password input by the player.
+     * @param con
      * @return Returns a boolean if everything was made in a correct way or not.
      * @throws SQLException It's thrown when a Username has been taken by
      * another player.
      */
-    public static boolean newUser(String username, String password) throws SQLException {
+    public static boolean newUser(String username, String password, Connection con) throws SQLException {
         try {
             String sql = "INSERT INTO gameuser VALUES (NULL, '"
                     + username + "','" + password + "',0,0)";
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             stm.execute(sql);
             return true;
         } catch (SQLException ex) {
@@ -87,18 +90,19 @@ public class DB {
      *
      * @param username The username input of the player.
      * @param password The password input of the player
+     * @param con
      * @return Returns a GameUser with its IDUser and Username.
      */
-    public static GameUser getUser(String username, String password) {
+    public static GameUser getUser(String username, String password, Connection con) {
         ResultSet result;
         try {
             String sql = "SELECT * FROM gameuser WHERE Username = '"
                     + username + "' AND Password = '" + password + "'";
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             result = stm.executeQuery(sql);
 
             while (result.next()) {
-                updateConnectionUser(result.getInt("IDUser"), true);
+                updateConnectionUser(result.getInt("IDUser"), true, con);
                 return new GameUser(
                         result.getInt("IDUser"),
                         result.getString("Username"));
@@ -118,14 +122,16 @@ public class DB {
      * @param idUser The IDUser of the player that it's connected or
      * disconnected.
      * @param connected The new status of the player.
+     * @param con
      */
-    public static void updateConnectionUser(int idUser, boolean connected) {
+    public static void updateConnectionUser(int idUser, boolean connected, Connection con) {
         int number = connected ? 1 : 0;
         try {
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             stm.execute("UPDATE gameuser SET CurrentStatus = " + number
                     + " WHERE IDUser = " + idUser);
         } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -136,11 +142,12 @@ public class DB {
      * @param idUser The user that is playing or stops playing.
      * @param playing The new playing status: true - Available to play another
      * game. false - Not available to play because is busy.
+     * @param con
      */
-    public static void updatePlayingStatus(int idUser, boolean playing) {
+    public static void updatePlayingStatus(int idUser, boolean playing, Connection con) {
         int number = playing ? 1 : 0;
         try {
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             stm.execute("UPDATE gameuser SET Playing = " + number
                     + " WHERE IDUser = " + idUser);
         } catch (SQLException e) {
@@ -151,13 +158,14 @@ public class DB {
      * getUsersConnected Method to retrieve all the users that are connected and
      * waiting for a match.
      *
+     * @param con
      * @return The players with currentStatus = 1.
      */
-    public static ArrayList<GameUser> getUsersConnected() {
+    public static ArrayList<GameUser> getUsersConnected(Connection con) {
         ResultSet result;
         ArrayList<GameUser> players = new ArrayList<>();
         try {
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             result = stm.executeQuery("SELECT * FROM gameuser WHERE CurrentStatus = 1"
                     + " AND Playing = 0");
             while (result.next()) {
@@ -181,12 +189,13 @@ public class DB {
      * @param idUserO The IDUser of the player playing with O.
      * @param result The result of the match. 1 - PlayerX Wins. 2 - PlayerO
      * Wins. 3 - Tie.
+     * @param con
      */
-    public static void setMatchResult(int idUserX, int idUserO, int result) {
+    public static void setMatchResult(int idUserX, int idUserO, int result, Connection con) {
         try {
             String sql = "INSERT INTO gamematch VALUES (NULL, NOW(),"
                     + idUserX + "," + idUserO + "," + result + ")";
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             stm.execute(sql);
         } catch (SQLException e) {
         }
@@ -197,9 +206,10 @@ public class DB {
      * other players.
      *
      * @param idUser The ID of the player that wants to know its record.
+     * @param con
      * @return Returns a list with all of their matches played ordered by date.
      */
-    public static ArrayList<Match> getRecord(int idUser) {
+    public static ArrayList<Match> getRecord(int idUser, Connection con) {
         ResultSet result;
         ArrayList<Match> record = new ArrayList<>();
         try {
@@ -211,7 +221,7 @@ public class DB {
                     + "WHERE GU.IDUser = " + idUser + " OR GAU.IDUser = " + idUser
                     + " ORDER BY Day";
 
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             result = stm.executeQuery(sql);
             while (result.next()) {
                 record.add(new Match(
@@ -230,10 +240,12 @@ public class DB {
     /**
      * shutDownPlayer Method used if the server goes down, so the next time
      * player can logIn without a problem.
+     *
+     * @param con
      */
-    public static void shutDownPlayers() {
+    public static void shutDownPlayers(Connection con) {
         try {
-            Statement stm = getConnection().createStatement();
+            Statement stm = con.createStatement();
             stm.execute("UPDATE gameuser SET Playing = 0, CurrentStatus = 0");
         } catch (SQLException e) {
         }

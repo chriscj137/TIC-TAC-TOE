@@ -10,7 +10,7 @@ package tictactoe.Models;
  * @author mauri
  */
 public class GameUser {
-    
+
     public int idUser;
     public String username;
     public String password;
@@ -23,11 +23,14 @@ public class GameUser {
         this.currentStatus = true;
         this.currentStatus = false;
     }
-    
+
     @Override
-    public String toString()
-    {
-        return "Username: " + username + "\nCurrentStauts: " + currentStatus;
+    public String toString() {
+        return "idUser: " + idUser + "\n"
+                + "username: " + username + "\n"
+                + "password: " + password + "\n"
+                + "currentStatus: " + currentStatus + "\n"
+                + "Playing: " + Playing;
     }
-    
+
 }
