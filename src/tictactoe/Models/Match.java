@@ -27,9 +27,9 @@ public class Match {
 
     @Override
     public String toString() {
-        return "Date: " + Date + "\n"
-                + "PlayerX: " + PlayerX + "\n"
-                + "PlayerO: " + PlayerO + "\n"
-                + "Result: " + Result;
+        return Date + "\n"
+                + PlayerX + "\n"
+                + PlayerO + "\n"
+                + Result;
     }
 }

@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import tictactoe.DB;
 import tictactoe.Models.GameUser;
+import tictactoe.Models.Match;
 
 /**
  *
@@ -75,6 +76,9 @@ public class ClientHandler implements Runnable {
                     case "logout":
                         logout();
                         break;
+                    case "record":
+                        record();
+                        break;
                     case "allGUCon":
                         allGUCon();
                         break;
@@ -127,6 +131,16 @@ public class ClientHandler implements Runnable {
     private void logout() {
         if (gu != null) {
             DB.updateConnectionUser(gu.idUser, false, con);
+        }
+    }
+    
+    private void record() throws IOException {
+        ArrayList<Match> matches = DB.getRecord(gu.idUser, con);
+        
+        dos.writeInt(matches.size());
+        
+        for (Match m : matches) {
+            dos.writeUTF(m.toString());
         }
     }
 
