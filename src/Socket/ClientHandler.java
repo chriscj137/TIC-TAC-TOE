@@ -21,7 +21,7 @@ import tictactoe.Models.GameUser;
  *
  * @author chris
  */
-public class ClientHandler extends Thread {
+public class ClientHandler implements Runnable {
 
     private final DataInputStream dis;
     private final DataOutputStream dos;
@@ -42,6 +42,7 @@ public class ClientHandler extends Thread {
      * @param dos the DataOutputStream of the socket, used for posting to the
      * other end of the communication
      * @param server
+     * @throws java.sql.SQLException
      */
     public ClientHandler(Socket socket, DataInputStream dis, DataOutputStream dos, Server server) throws SQLException {
         this.s = socket;
