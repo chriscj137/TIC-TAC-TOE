@@ -18,19 +18,23 @@ public class Match {
     public String PlayerO;
     public String Result;
 
-    public Match(Date Date, String PlayerX, String PlayerO, String Result) {
-        this.Date = Date;
+    public Match(String PlayerX, String PlayerO, String Result) {
         this.PlayerX = PlayerX;
         this.PlayerO = PlayerO;
         this.Result = Result;
     }
     
     @Override
+<<<<<<< Updated upstream
     public String toString()
     {
         return "Date: " + Date + "\n"
             + "PlayerX: " + PlayerX + "\n"
             + "PlayerO: " + PlayerO + "\n"
             + "Result: " + Result;
+=======
+    public String toString() {
+        return "     ," + PlayerX + "     ," + PlayerO + "     " + Result;
+>>>>>>> Stashed changes
     }
 }

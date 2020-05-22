@@ -105,11 +105,20 @@ public class DB {
      */
     public void updateConnectionUser(int idUser, boolean connected) {
         int number = connected ? 1 : 0;
+<<<<<<< Updated upstream
         try
         {
             Statement stm = con.createStatement();
             stm.execute("UPDATE gameuser SET CurrentStatus = " + number +
                 " WHERE IDUser = " + idUser);
+=======
+        try {
+            Statement stm = getConnection().createStatement();
+            stm.execute("UPDATE gameuser SET CurrentStatus = " + number
+                    + " WHERE IDUser = " + idUser);
+        } catch (SQLException e) {
+            System.out.println("LOL");
+>>>>>>> Stashed changes
         }
         catch(SQLException e){}
     }
@@ -192,9 +201,14 @@ public class DB {
     public ArrayList<Match> getRecord(int idUser) {
         ResultSet result;
         ArrayList<Match> record = new ArrayList<>();
+<<<<<<< Updated upstream
         try
         {
             String sql = "SELECT GM.Day AS Day, GU.Username AS PlayerX, "
+=======
+        try {
+            String sql = "SELECT GU.Username AS PlayerX, "
+>>>>>>> Stashed changes
                     + "GAU.Username AS PlayerO, R.Result AS Result FROM gamematch AS GM "
                     + "JOIN gameuser AS GU ON GM.IDUserX = GU.IDUser "
                     + "JOIN gameuser AS GAU ON GM.IDUserO = GAU.IDUser "
@@ -207,10 +221,16 @@ public class DB {
             while (result.next())
             {
                 record.add(new Match(
+<<<<<<< Updated upstream
                     result.getDate("Day"),
                     result.getString("PlayerX"),
                     result.getString("PlayerO"),
                     result.getString("Result")
+=======
+                        result.getString("PlayerX"),
+                        result.getString("PlayerO"),
+                        result.getString("Result")
+>>>>>>> Stashed changes
                 ));
             }
             return record;
