@@ -34,6 +34,22 @@ public class Server {
         return clientHandlers;
     }
 
+    public ClientHandler getClientHandlerFromGameUser(GameUser gu) {
+        for (ClientHandler c : clientHandlers) {
+            if (c.getGu().idUser == gu.idUser) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    public void challengeClientHandlerFromGameUser(GameUser gu, GameUser duelist) throws IOException {
+        // System.out.println(gu);
+        ClientHandler c = getClientHandlerFromGameUser(gu);
+        c.getDos().writeUTF("challenged");
+        c.getDos().writeUTF(duelist.toString());
+    }
+
     public ArrayList<GameUser> getConnectedClients() {
         ArrayList<GameUser> gameUsersConnected = new ArrayList();
         for (ClientHandler c : clientHandlers) {

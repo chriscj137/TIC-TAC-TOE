@@ -22,15 +22,33 @@ public class GameUser {
         this.username = username;
         this.currentStatus = true;
         this.currentStatus = false;
+        this.Playing = false;
+    }
+
+    public GameUser(int idUser, String username, String password, Boolean cS, Boolean Playing) {
+        this.idUser = idUser;
+        this.username = username;
+        this.password = password;
+        this.currentStatus = cS;
+        this.Playing = Playing;
+    }
+
+    public GameUser(String GameUser) {
+        String[] arrOfStr = GameUser.split("\n", 5);
+        this.idUser = Integer.parseInt(arrOfStr[0]);
+        this.username = arrOfStr[1];
+        this.password = arrOfStr[2];
+        this.currentStatus = Boolean.parseBoolean(arrOfStr[3]);
+        this.Playing = Boolean.parseBoolean(arrOfStr[4]);
     }
 
     @Override
     public String toString() {
-        return "idUser: " + idUser + "\n"
-                + "username: " + username + "\n"
-                + "password: " + password + "\n"
-                + "currentStatus: " + currentStatus + "\n"
-                + "Playing: " + Playing;
+        return idUser + "\n"
+                + username + "\n"
+                + password + "\n"
+                + currentStatus + "\n"
+                + Playing;
     }
 
 }

@@ -5,11 +5,9 @@
  */
 package Socket;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -29,6 +27,18 @@ public class ClientHandler implements Runnable {
     private final Server server;
     private final Connection con;
     private GameUser gu;
+
+    public DataInputStream getDis() {
+        return dis;
+    }
+
+    public DataOutputStream getDos() {
+        return dos;
+    }
+
+    public Socket getS() {
+        return s;
+    }
 
     public GameUser getGu() {
         return gu;
@@ -70,7 +80,7 @@ public class ClientHandler implements Runnable {
                         login();
                         break;
                     case "register":
-                        register();
+                        dos.writeBoolean(register());
                         break;
                     case "logout":
                         logout();
@@ -78,9 +88,17 @@ public class ClientHandler implements Runnable {
                     case "allGUCon":
                         allGUCon();
                         break;
+                    case "duel":
+                        GameUser gameUser = new GameUser(dis.readUTF());
+                        Boolean accepted = duel(gameUser);
+                        break;
                     case "exit":
+                        dis.close();
+                        dos.close();
+                        s.close();
                         logout();
-                        endCommunication = false;
+                        con.close();
+                        endCommunication = true;
                         break;
                 }
             } catch (IOException ex) {
@@ -88,13 +106,6 @@ public class ClientHandler implements Runnable {
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-        }
-        try {
-            dis.close();
-            dos.close();
-            s.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -109,18 +120,16 @@ public class ClientHandler implements Runnable {
             String username = dis.readUTF();
             String password = dis.readUTF();
 
-            System.out.println(username);
-            System.out.println(password);
+            GameUser gameUser = DB.getUser(username, password, con);
 
-            gu = DB.getUser(username, password, con);
-
-            if (gu != null) {
+            if (gameUser != null && gameUser.currentStatus == false) {
+                gu = gameUser;
                 DB.updateConnectionUser(gu.idUser, true, con);
-                System.out.println(gu);
                 dos.writeBoolean(true);
-                return;
+                dos.writeUTF(gameUser.toString());
+            } else {
+                dos.writeBoolean(false);
             }
-            dos.writeBoolean(false);
         }
     }
 
@@ -136,20 +145,33 @@ public class ClientHandler implements Runnable {
      * @throws SQLException if the communication with the database connection
      * pool failed
      */
-    private void register() throws IOException, SQLException {
+    private Boolean register() throws IOException, SQLException {
         String username = dis.readUTF();
         String password = dis.readUTF();
 
-        DB.newUser(username, password, con);
+        return DB.newUser(username, password, con);
     }
 
     private void allGUCon() throws IOException {
         ArrayList<GameUser> allGUConnected = DB.getUsersConnected(con);
 
-        dos.write(allGUConnected.size());
+        dos.writeInt(allGUConnected.size());
 
         for (GameUser GU : allGUConnected) {
             dos.writeUTF(GU.toString());
+        }
+    }
+
+    private Boolean duel(GameUser gameUser) throws IOException {
+        GameUser gameUserToDuel = DB.getUser(gameUser.username, gameUser.password, con);
+        // System.out.println(gameUser);
+        if (gameUserToDuel.Playing) {
+            return false;
+        } else {
+            DB.updatePlayingStatus(gu.idUser, true, con);
+            server.challengeClientHandlerFromGameUser(gameUserToDuel, gu);
+
+            return true;
         }
     }
 }

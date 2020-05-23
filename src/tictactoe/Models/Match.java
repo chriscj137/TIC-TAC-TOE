@@ -5,6 +5,8 @@
  */
 package tictactoe.Models;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -25,11 +27,19 @@ public class Match {
         this.Result = Result;
     }
 
+    public Match(String match) throws ParseException {
+        String[] arrOfStr = match.split("\n", 4);
+        this.Date = new SimpleDateFormat("yyyy-MM-dd").parse(arrOfStr[0]);
+        this.PlayerX = arrOfStr[1];
+        this.PlayerO = arrOfStr[2];
+        this.Result = arrOfStr[3];
+    }
+
     @Override
     public String toString() {
-        return "Date: " + Date + "\n"
-                + "PlayerX: " + PlayerX + "\n"
-                + "PlayerO: " + PlayerO + "\n"
-                + "Result: " + Result;
+        return Date + "\n"
+                + PlayerX + "\n"
+                + PlayerO + "\n"
+                + Result;
     }
 }

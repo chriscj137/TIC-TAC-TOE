@@ -105,7 +105,10 @@ public class DB {
                 updateConnectionUser(result.getInt("IDUser"), true, con);
                 return new GameUser(
                         result.getInt("IDUser"),
-                        result.getString("Username"));
+                        result.getString("Username"),
+                        result.getString("Password"),
+                        result.getInt("CurrentStatus") == 1,
+                        result.getInt("Playing") == 1);
             }
             return null;
         } catch (SQLException ex) {
@@ -167,12 +170,16 @@ public class DB {
         try {
             Statement stm = con.createStatement();
             result = stm.executeQuery("SELECT * FROM gameuser WHERE CurrentStatus = 1"
+                    //);
                     + " AND Playing = 0");
             while (result.next()) {
                 players.add(new GameUser(
                         result.getInt("IDUser"),
-                        result.getString("Username")
-                ));
+                        result.getString("Username"),
+                        result.getString("Password"),
+                        result.getInt("CurrentStatus") == 1,
+                        result.getInt("Playing") == 1)
+                );
             }
             return players;
         } catch (SQLException ex) {
