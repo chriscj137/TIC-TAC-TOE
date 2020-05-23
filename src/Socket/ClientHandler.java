@@ -67,6 +67,9 @@ public class ClientHandler implements Runnable {
                 received = dis.readUTF();
 
                 switch (received) {
+                    case "results":
+                        results();
+                        break;
                     case "login":
                         login();
                         break;
@@ -141,6 +144,14 @@ public class ClientHandler implements Runnable {
         
         for (Match m : matches) {
             dos.writeUTF(m.toString());
+        }
+    }
+    private void results() throws IOException{
+        ArrayList<Integer> results = DB.GetResults(gu.idUser, con);
+        dos.writeInt(results.size());
+        for(int i : results){
+            System.out.println(String.valueOf(i));
+            dos.writeUTF(String.valueOf(i));
         }
     }
 

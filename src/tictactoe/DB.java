@@ -6,6 +6,7 @@
 package tictactoe;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -248,6 +249,31 @@ public class DB {
             Statement stm = con.createStatement();
             stm.execute("UPDATE gameuser SET Playing = 0, CurrentStatus = 0");
         } catch (SQLException e) {
+        }
+    }
+    public static ArrayList<Integer> GetResults(int IDUser,Connection con){
+        try {
+            ArrayList<Integer> results = new ArrayList<>();
+            ResultSet result;
+            PreparedStatement stmt = con.prepareStatement("SET @USUARIO = '"+IDUser+"';"
+                    + "\n" +
+                "SET @TOTAL = (SELECT COUNT(*) FROM gamematch WHERE IDUserX = @USUARIO OR IDUserO = @USUARIO);\n" +
+                "SET @GANADASX = (SELECT COUNT(*) FROM gamematch WHERE IDUserX = @USUARIO AND IDResult = 1);\n" +
+                "SET @GANADASO = (SELECT COUNT(*) FROM gamematch WHERE IDUserO = @USUARIO AND IDResult = 2);\n" +
+                "SET @EMPATE = (SELECT COUNT(*) FROM gamematch WHERE \n" +
+                "               (IDUserX = @USUARIO AND IDResult = 3) OR (IDUserO = @USUARIO AND IDResult = 3));\n" +
+                "SELECT @TOTAL AS Totales, (@GANADASX + @GANADASO) AS Ganadas, @TOTAL - (@GANADASX + @GANADASO) AS Perdidas, @EMPATE AS Empate");
+                result = stmt.executeQuery();
+                results.add(result.getInt("Totales"));
+                results.add(result.getInt("Ganadas"));
+                results.add(result.getInt("Perdidas"));
+                results.add(result.getInt("Empate"));
+                System.out.println(results.get(0));
+            return results;
+            
+                
+        }catch (SQLException e) {
+            return null;
         }
     }
 
