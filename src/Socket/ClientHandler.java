@@ -148,7 +148,6 @@ public class ClientHandler implements Runnable {
     }
     private void results() throws IOException{
         ArrayList<Integer> results = DB.GetResults(gu.idUser, con);
-        dos.writeInt(results.size());
         for(int i : results){
             System.out.println(String.valueOf(i));
             dos.writeUTF(String.valueOf(i));
