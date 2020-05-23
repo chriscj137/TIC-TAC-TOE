@@ -252,23 +252,31 @@ public class DB {
         }
     }
     public static ArrayList<Integer> GetResults(int IDUser,Connection con){
+        ArrayList<Integer> results = new ArrayList<>();
+        ResultSet result;
         try {
-            ArrayList<Integer> results = new ArrayList<>();
-            ResultSet result;
-            PreparedStatement stmt = con.prepareStatement("SET @USUARIO = '"+IDUser+"';"
-                    + "\n" +
-                "SET @TOTAL = (SELECT COUNT(*) FROM gamematch WHERE IDUserX = @USUARIO OR IDUserO = @USUARIO);\n" +
-                "SET @GANADASX = (SELECT COUNT(*) FROM gamematch WHERE IDUserX = @USUARIO AND IDResult = 1);\n" +
-                "SET @GANADASO = (SELECT COUNT(*) FROM gamematch WHERE IDUserO = @USUARIO AND IDResult = 2);\n" +
-                "SET @EMPATE = (SELECT COUNT(*) FROM gamematch WHERE \n" +
-                "               (IDUserX = @USUARIO AND IDResult = 3) OR (IDUserO = @USUARIO AND IDResult = 3));\n" +
-                "SELECT @TOTAL AS Totales, (@GANADASX + @GANADASO) AS Ganadas, @TOTAL - (@GANADASX + @GANADASO) AS Perdidas, @EMPATE AS Empate");
-                result = stmt.executeQuery();
-                results.add(result.getInt("Totales"));
-                results.add(result.getInt("Ganadas"));
-                results.add(result.getInt("Perdidas"));
-                results.add(result.getInt("Empate"));
-                System.out.println(results.get(0));
+            
+            String sql = "SELECT (SELECT COUNT(*) FROM gamematch WHERE IDUserX = "+ IDUser +" OR IDUserO = "+ IDUser +") AS Totales, \n" +
+"(SELECT COUNT(*) FROM gamematch WHERE (IDUserX = "+ IDUser +" AND IDResult = 1) OR (IDUserO = "+ IDUser +" AND IDResult = 2)) AS Ganadas, \n" +
+"(SELECT COUNT(*) FROM gamematch WHERE IDUserX = "+ IDUser +" OR IDUserO = 3) -  \n" +
+"(SELECT COUNT(*) FROM gamematch WHERE (IDUserX = "+ IDUser +" AND IDResult = 1) OR (IDUserO = "+ IDUser +" AND IDResult = 2))\n" +
+"AS Perdidas,\n" +
+"(SELECT COUNT(*) FROM gamematch WHERE \n" +
+"(IDUserX = "+ IDUser +" AND IDResult = 3) OR (IDUserO = "+ IDUser +" AND IDResult = 3))AS Empate";
+            
+            ///////////////////////////////
+            /////////////////////////////
+            
+                Statement stm = con.createStatement();
+                result = stm.executeQuery(sql);
+                
+                while (result.next()) {
+                    results.add(result.getInt("Totales"));
+                    results.add(result.getInt("Ganadas"));
+                    results.add(result.getInt("Perdidas"));
+                    results.add(result.getInt("Empate"));
+                }
+                    System.out.println(results.get(0));
             return results;
             
                 

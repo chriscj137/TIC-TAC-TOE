@@ -23,6 +23,8 @@ public class Tictactoe {
      * @throws java.io.IOException
      */
     public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
+        DB db = new DB();
+        DB.GetResults(3, DB.getConnection());
         Server server = new Server();
     }
 }
