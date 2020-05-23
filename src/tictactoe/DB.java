@@ -216,6 +216,7 @@ public class DB {
      * @param con
      * @return Returns a list with all of their matches played ordered by date.
      */
+
     public static ArrayList<Match> getRecord(int idUser, Connection con) {
         ResultSet result;
         ArrayList<Match> record = new ArrayList<>();
